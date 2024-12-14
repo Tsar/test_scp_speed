@@ -1,0 +1,9 @@
+{
+  "hostname": "example.com",
+  "port": 22,
+  "username": "user",
+  "password": "password",
+  "key_filename": "id_rsa", // specify password OR key_filename
+  "remote_path": "/home/user/random_file_1GB.bin",
+  "expected_md5": "b1f5dc17cb88fd8958e577fb32686676"
+}
