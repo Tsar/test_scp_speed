@@ -34,6 +34,8 @@ def calculate_md5(filename, chunk_size=65536):
     return md5_hash.hexdigest()
 
 if __name__ == '__main__':
+    launch_datetime = datetime.now().strftime('%Y-%m-%d %H:%M')
+
     if len(sys.argv) < 2:
         print(f'Usage: {sys.argv[0]} <JSON config file>')
         sys.exit(0)
@@ -42,6 +44,7 @@ if __name__ == '__main__':
         config = json.load(configFile)
         remote_path = config['remote_path']    # file that will be downloaded
         expected_md5 = config['expected_md5']  # md5 of the file
+        report_filename = config.get('report_filename')
 
     local_tmp_filename = f'/tmp/test_scp_speed_file_{randint(1000000, 9999999)}.bin'
 
@@ -61,15 +64,25 @@ if __name__ == '__main__':
         elapsed = t() - download_start_time
 
     file_size_mb = os.path.getsize(local_tmp_filename) / 1048576.0
+    avg_speed = file_size_mb / elapsed
     log(
         'Download finished:\n' +
-        f' * elapsed:       {elapsed:.1f} seconds\n' +
         f' * file size:     {file_size_mb:.1f} MB\n' +
-        f' * average speed: {file_size_mb / elapsed:.2f} MB / second'
+        f' * elapsed:       {elapsed:.1f} sec\n' +
+        f' * average speed: {avg_speed:.2f} MB/sec'
     )
     md5 = calculate_md5(local_tmp_filename)
-    if md5.lower() == expected_md5.lower():
+    md5_matches = md5.lower() == expected_md5.lower()
+    if md5_matches:
         log('MD5 hash matches expected')
     else:
         log(f'MD5 hashes do not match: got {md5}, expected {expected_md5}')
     os.remove(local_tmp_filename)
+
+    if report_filename:
+        report_file_existed = os.path.isfile(report_filename)
+        with open(report_filename, 'a') as report:
+            if not report_file_existed:
+                report.write('Timestamp,File size (MB),Elapsed (sec),Average speed (MB/sec),MD5 matches\n')
+            md5_ok = 'Yes' if md5_matches else f'"No: got {md5}, expected {expected_md5}"'
+            report.write(f'{launch_datetime},{file_size_mb:.1f},{elapsed:.1f},{avg_speed:.2f},{md5_ok}\n')

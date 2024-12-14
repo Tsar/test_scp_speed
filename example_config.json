@@ -5,5 +5,6 @@
   "password": "password",
   "key_filename": "id_rsa", // specify password OR key_filename
   "remote_path": "/home/user/random_file_1GB.bin",
-  "expected_md5": "b1f5dc17cb88fd8958e577fb32686676"
+  "expected_md5": "b1f5dc17cb88fd8958e577fb32686676",
+  "report_filename": "example_report.csv" // if report_filename is specified, results will be appended to it
 }
